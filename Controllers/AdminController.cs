@@ -57,6 +57,8 @@ namespace Blogs.Controllers
             return View(model);
         }
 
+
+
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
@@ -80,6 +82,7 @@ namespace Blogs.Controllers
             return View("Index", userManager.Users);
         }
 
+        //Adds Errors to model State
         private void AddErrorsFromResult(IdentityResult result)
         {
             foreach (IdentityError error in result.Errors)
@@ -88,16 +91,12 @@ namespace Blogs.Controllers
             }
         }
 
+        // Gets editable user ID and goes to Edit Page
         public async Task<IActionResult> Edit(string id)
         {
             AppUser editUser = await userManager.FindByIdAsync(id);
             if (editUser != null)
             {
-                EditModel em = new EditModel();
-                //em.ID = editUser.Id;
-                //em.Name = editUser.UserName;
-                //em.Email = editUser.Email;
-                //em.Password = editUser.PasswordHash;
                 return View(editUser);
             }
             else
@@ -106,18 +105,19 @@ namespace Blogs.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(string id, string email, string password, string userName)
+        //Edits the User Profile based on Post Data
+        [HttpPost]  //Post Method
+        public async Task<IActionResult> Edit(string id, string email, string password, string userName)  //Inputs Recieved through Post
         {
-            AppUser user = await userManager.FindByIdAsync(id);
-            if (user != null)
+            AppUser user = await userManager.FindByIdAsync(id);  //Get User
+            if (user != null)  //If Valid User
             {
                 user.Email = email;
-                user.UserName = userName;
-                IdentityResult validEmailAndUsername = await userValidator.ValidateAsync(userManager, user);
-                if (!validEmailAndUsername.Succeeded)
+                user.UserName = userName;  //Give User Updated Name & Email
+                IdentityResult validEmailAndUsername = await userValidator.ValidateAsync(userManager, user);  //Validate
+                if (!validEmailAndUsername.Succeeded)  //If Fail
                 {
-                    AddErrorsFromResult(validEmailAndUsername);
+                    AddErrorsFromResult(validEmailAndUsername); //Add Errors
                 }
                 //
                // user.UserName = userName;
@@ -127,37 +127,37 @@ namespace Blogs.Controllers
                 //    AddErrorsFromResult(validEmail);
                 //}
                 //
-                IdentityResult validPass = null;
-                if (!string.IsNullOrEmpty(password))
+                IdentityResult validPass = null;  //Holds Validity of Password
+                if (!string.IsNullOrEmpty(password))  //If change to password
                 {
-                    validPass = await passwordValidator.ValidateAsync(userManager, user, password);
-                    if (validPass.Succeeded)
+                    validPass = await passwordValidator.ValidateAsync(userManager, user, password); //Checj Validity
+                    if (validPass.Succeeded) // If Valid update user password hash
                     {
                         user.PasswordHash = passwordHasher.HashPassword(user, password);
                     }
-                    else
+                    else //Else Generate Errors
                     {
                         AddErrorsFromResult(validPass);
                     }
                 }
-                if ((validEmailAndUsername.Succeeded && validPass == null) || (validEmailAndUsername.Succeeded && password != string.Empty && validPass.Succeeded))
+                if ((validEmailAndUsername.Succeeded && validPass == null) || (validEmailAndUsername.Succeeded && password != string.Empty && validPass.Succeeded))  // If Completely Valid
                 {
-                    IdentityResult result = await userManager.UpdateAsync(user);
-                    if (result.Succeeded)
+                    IdentityResult result = await userManager.UpdateAsync(user); //Update DB
+                    if (result.Succeeded) //If Success, redirect
                     {
                         return RedirectToAction("Index");
                     }
-                    else
+                    else  // If fail, send back to form
                     {
                         AddErrorsFromResult(result);
                     }
                 }
             }
-            else
+            else  // If no user, add error
             {
                 ModelState.AddModelError("", "User Not Found");
             }
-            return View(user);
+            return View(user); // Return to form
         }
     }
 }

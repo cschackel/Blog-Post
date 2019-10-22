@@ -50,9 +50,6 @@
     <Compile Update="Models\AppUser.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
-    <Compile Update="Models\EditModel.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
     <Compile Update="Models\EFBloggingRepository.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
